@@ -1,7 +1,7 @@
 """Data loader for fetching historical price data."""
 
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 import pandas as pd
 import yfinance as yf
 
@@ -9,7 +9,7 @@ from src.config_loader import Config
 
 
 def fetch_prices(
-    tickers: list[str],
+    tickers: List[str],
     start_date: str,
     end_date: str,
     cache_path: Optional[Path] = None,
