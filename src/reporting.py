@@ -12,21 +12,67 @@ from src.pipeline import AnalysisResult, PortfolioAnalysis
 def plot_efficient_frontier(analysis: AnalysisResult, show_simulation: bool = True) -> go.Figure:
     """Create efficient frontier plot."""
     fig = go.Figure()
+    
     if show_simulation:
-        fig.add_trace(go.Scatter(x=analysis.simulation_results["Volatility"], y=analysis.simulation_results["Return"],
-            mode="markers", marker=dict(size=4, color=analysis.simulation_results["Sharpe"], colorscale="Viridis",
-            colorbar=dict(title="Sharpe"), opacity=0.6), name="Random Portfolios"))
+        sim_marker = dict(
+            size=4,
+            color=analysis.simulation_results["Sharpe"],
+            colorscale="Viridis",
+            colorbar=dict(title="Sharpe"),
+            opacity=0.6,
+        )
+        fig.add_trace(go.Scatter(
+            x=analysis.simulation_results["Volatility"],
+            y=analysis.simulation_results["Return"],
+            mode="markers",
+            marker=sim_marker,
+            name="Random Portfolios",
+        ))
+    
     frontier_vols = [p.volatility for p in analysis.efficient_frontier]
     frontier_rets = [p.expected_return for p in analysis.efficient_frontier]
-    fig.add_trace(go.Scatter(x=frontier_vols, y=frontier_rets, mode="lines", line=dict(color="red", width=3), name="Efficient Frontier"))
-    fig.add_trace(go.Scatter(x=[analysis.min_variance_portfolio.volatility], y=[analysis.min_variance_portfolio.expected_return],
-        mode="markers", marker=dict(size=15, color="blue", symbol="star"), name="Min Variance"))
-    fig.add_trace(go.Scatter(x=[analysis.max_sharpe_portfolio.volatility], y=[analysis.max_sharpe_portfolio.expected_return],
-        mode="markers", marker=dict(size=15, color="green", symbol="star"), name="Max Sharpe"))
-    fig.add_trace(go.Scatter(x=list(analysis.volatilities), y=list(analysis.mean_returns), mode="markers+text",
-        marker=dict(size=10, color="orange"), text=analysis.asset_names, textposition="top center", name="Assets"))
-    fig.update_layout(title="Efficient Frontier", xaxis_title="Volatility", yaxis_title="Expected Return",
-        xaxis_tickformat=".1%", yaxis_tickformat=".1%")
+    fig.add_trace(go.Scatter(
+        x=frontier_vols,
+        y=frontier_rets,
+        mode="lines",
+        line=dict(color="red", width=3),
+        name="Efficient Frontier",
+    ))
+    
+    # Add optimal portfolios
+    fig.add_trace(go.Scatter(
+        x=[analysis.min_variance_portfolio.volatility],
+        y=[analysis.min_variance_portfolio.expected_return],
+        mode="markers",
+        marker=dict(size=15, color="blue", symbol="star"),
+        name="Min Variance",
+    ))
+    fig.add_trace(go.Scatter(
+        x=[analysis.max_sharpe_portfolio.volatility],
+        y=[analysis.max_sharpe_portfolio.expected_return],
+        mode="markers",
+        marker=dict(size=15, color="green", symbol="star"),
+        name="Max Sharpe",
+    ))
+    
+    # Add individual assets
+    fig.add_trace(go.Scatter(
+        x=list(analysis.volatilities),
+        y=list(analysis.mean_returns),
+        mode="markers+text",
+        marker=dict(size=10, color="orange"),
+        text=analysis.asset_names,
+        textposition="top center",
+        name="Assets",
+    ))
+    
+    fig.update_layout(
+        title="Efficient Frontier",
+        xaxis_title="Volatility",
+        yaxis_title="Expected Return",
+        xaxis_tickformat=".1%",
+        yaxis_tickformat=".1%",
+    )
     return fig
 
 

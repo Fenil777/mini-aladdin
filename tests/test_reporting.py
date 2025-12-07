@@ -16,7 +16,7 @@ from src.reporting import (
 )
 
 
-class TestPlotEffecientFrontier:
+class TestPlotEfficientFrontier:
     """Test plot_efficient_frontier function."""
     
     def test_returns_figure(self):
