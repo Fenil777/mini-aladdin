@@ -3,7 +3,7 @@
 import numpy as np
 import pandas as pd
 from scipy.optimize import minimize
-from typing import List, Dict, Union
+from typing import List, Union
 from dataclasses import dataclass
 
 from src.risk_metrics import portfolio_return, portfolio_volatility, portfolio_sharpe_ratio
@@ -59,7 +59,7 @@ def maximize_sharpe(
         ret = portfolio_return(weights, mean_returns)
         vol = portfolio_volatility(weights, cov_matrix)
         if vol == 0:
-            return 0
+            return -np.inf
         return -(ret - risk_free_rate) / vol
     
     constraints = {"type": "eq", "fun": lambda w: np.sum(w) - 1}
