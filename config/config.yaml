@@ -1,0 +1,25 @@
+# Mini Aladdin Configuration
+
+data:
+  tickers:
+    - AAPL
+    - MSFT
+    - GOOGL
+    - AMZN
+    - JPM
+    - JNJ
+    - XOM
+    - GLD
+    - TLT
+    - VNQ
+  start_date: "2022-01-01"
+  end_date: "2024-12-31"
+
+portfolio:
+  risk_free_rate: 0.04  # 4% annual risk-free rate
+
+simulation:
+  n_portfolios: 5000  # Number of random portfolios for Monte Carlo
+
+risk:
+  var_confidence: 0.95  # 95% confidence for VaR/CVaR
