@@ -1,36 +1,55 @@
-"""
-Mini Aladdin - Portfolio Optimization & Risk Engine
+"""Mini Aladdin - Portfolio Optimization & Risk Engine CLI."""
 
-CLI entry point for running portfolio analysis.
-"""
-
-from src.config_loader import load_config
-from src.data_loader import load_prices_from_config
+import argparse
+from pathlib import Path
+from src.pipeline import run_full_analysis
+from src.reporting import print_analysis_summary, save_summary_csv, plot_efficient_frontier, plot_weights_bar, plot_correlation_heatmap
 
 
 def main():
-    """Main entry point."""
+    parser = argparse.ArgumentParser(description="Mini Aladdin Portfolio Optimizer")
+    parser.add_argument("--config", "-c", default="config/config.yaml", help="Config file path")
+    parser.add_argument("--save-plots", action="store_true", help="Save plots to data/plots/")
+    parser.add_argument("--save-csv", action="store_true", help="Save CSV summary")
+    parser.add_argument("--show-plots", action="store_true", help="Show plots in browser")
+    args = parser.parse_args()
+    
     print("=" * 60)
     print("Mini Aladdin - Portfolio Optimization & Risk Engine")
     print("=" * 60)
+    print("\nRunning analysis...")
     
-    # Load configuration
-    print("\n[1/2] Loading configuration...")
-    config = load_config()
-    print(f"  Tickers: {config.data.tickers}")
-    print(f"  Date range: {config.data.start_date} to {config.data.end_date}")
-    print(f"  Risk-free rate: {config.portfolio.risk_free_rate:.2%}")
+    analysis = run_full_analysis(args.config)
+    print_analysis_summary(analysis)
     
-    # Load price data
-    print("\n[2/2] Loading price data...")
-    prices = load_prices_from_config(config)
-    print(f"  Loaded {len(prices)} days of data for {len(prices.columns)} tickers")
+    if args.save_csv:
+        save_summary_csv(analysis)
     
-    print("\n" + "=" * 60)
-    print("Milestone 1 Complete - Data layer operational!")
-    print("=" * 60)
+    if args.save_plots or args.show_plots:
+        plots_dir = Path("data/plots")
+        plots_dir.mkdir(parents=True, exist_ok=True)
+        
+        fig_frontier = plot_efficient_frontier(analysis)
+        if args.save_plots:
+            fig_frontier.write_html(plots_dir / "efficient_frontier.html")
+        if args.show_plots:
+            fig_frontier.show()
+        
+        for portfolio in [analysis.min_variance_portfolio, analysis.max_sharpe_portfolio]:
+            fig_weights = plot_weights_bar(portfolio, analysis.asset_names)
+            name = portfolio.name.lower().replace(" ", "_")
+            if args.save_plots:
+                fig_weights.write_html(plots_dir / f"weights_{name}.html")
+            if args.show_plots:
+                fig_weights.show()
+        
+        fig_corr = plot_correlation_heatmap(analysis)
+        if args.save_plots:
+            fig_corr.write_html(plots_dir / "correlation.html")
+        if args.show_plots:
+            fig_corr.show()
     
-    # TODO: Milestone 2+ will add returns, optimization, etc.
+    print("\nAnalysis complete!")
 
 
 if __name__ == "__main__":
